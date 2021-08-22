@@ -24,13 +24,32 @@ Movie.destroy_all
 require 'json'
 require 'open-uri'
 
-# url = 'http://tmdb.lewagon.com/movie/top_rated?api_key=ce9896efb804a19c567473d86dba682f'
-url = 'http://tmdb.lewagon.com/movie/top_rated'
-# movie_serialized = Movie.open(url).read
-movies = JSON.parse(open(url).read)["results"]
-puts movies.count
-movies.each do |movie|
-  puts movie
-end
+# # url = 'http://tmdb.lewagon.com/movie/top_rated?api_key=ce9896efb804a19c567473d86dba682f'
+# url = 'http://tmdb.lewagon.com/movie/top_rated'
+# # movie_serialized = Movie.open(url).read
+# movies = JSON.parse(open(url).read)["results"]
+# puts movies.count
+# movies.each do |movie|
+#   puts movie
+# end
 
+puts "Cleaning up database..."
+Movie.destroy_all
+puts "Database cleaned"
+url = "http://tmdb.lewagon.com/movie/top_rated"
+10.times do |i|
+  puts "Importing movies from page #{i + 1}"
+  movies = JSON.parse(open("#{url}?page=#{i + 1}").read)['results']
+  movies.each do |movie|
+    puts "Creating #{movie['title']}"
+    base_poster_url = "https://image.tmdb.org/t/p/original"
+    Movie.create(
+      title: movie['title'],
+      overview: movie['overview'],
+      poster_url: "#{base_poster_url}#{movie['backdrop_path']}",
+      rating: movie['vote_average']
+    )
+  end
+end
+puts "Movies created"
 # puts "#{movie['title']} - #{movie['overview']} - #{movie['poster_url']} - #{movie['rating']}"

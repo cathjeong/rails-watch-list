@@ -4,4 +4,7 @@ Rails.application.routes.draw do
   resources :lists do
     resources :bookmarks
   end
+  # separate line for bookmark destroy
+  resources :bookmarks, only: :destroy
+  # path: '/bookmarks/:id', as: :lists#delete
 end
